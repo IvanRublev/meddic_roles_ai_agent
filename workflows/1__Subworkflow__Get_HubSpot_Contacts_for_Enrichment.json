@@ -1,0 +1,1375 @@
+{
+  "updatedAt": "2026-01-06T09:11:58.892Z",
+  "createdAt": "2026-01-06T08:58:59.866Z",
+  "id": "oGBWJa-xD8EBisfRpf0jh",
+  "name": "1. Subworkflow: Get HubSpot Contacts for Enrichment",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "cc96faf6-d557-4b0e-963a-afdf74a6039e",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/companies/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\":[\n    {\n      \"filters\":[\n        {\n          \"propertyName\": \"associations.contact\",\n          \"operator\":\"EQ\",\n          \"value\": {{ $json.id }}\n        }\n      ]\n    }\n  ],\n  \"properties\": [\"name\", \"industry\", \"numberofemployees\", \"annualrevenue\", \"founded_year\", \"country\"],\n  \"limit\": 2\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2240,
+        1120
+      ],
+      "id": "3ffe34fb-abc4-47b4-b652-b9f9d3239276",
+      "name": "Search for companies of the contact",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "19rgyrjHjOQOxSNo",
+          "name": "HubSpot App Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 0.2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4512,
+        1184
+      ],
+      "id": "01269ce0-3db3-4bfc-b47a-33ff78cf7ba3",
+      "name": "Wait 200 ms",
+      "webhookId": "a19a2d10-f720-4220-b4d6-3553c255daf7"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef85f2a4-1694-4b8f-b346-b48780254e3e",
+              "name": "associated_company",
+              "value": "={{ $json.results[0] }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2896,
+        880
+      ],
+      "id": "67ce27ac-3c5f-4982-8bb5-844931a74f32",
+      "name": "Take company"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7c75419f-17a6-4ca4-baf2-8a014a75c7e6",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2464,
+        1120
+      ],
+      "id": "4763a6fc-9969-42f1-b29a-98d5b7bf7600",
+      "name": "If only one company per contact"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": "={{ $('Loop Over Contacts').context['done'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2016,
+        992
+      ],
+      "id": "25eab818-33be-4bee-b371-642e7ad1afa4",
+      "name": "Loop Over Contacts",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fa05b120-b794-40c1-8de2-a31cbf042b2c",
+              "leftValue": "={{ $json.item.contacts_length }}",
+              "rightValue": "={{ $json.item.batch_size }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2608,
+        384
+      ],
+      "id": "39e8441c-989e-4199-a744-5cdcc8e96149",
+      "name": "If last item and less contacts than batch_size"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e189a3ac-b7cf-4aa9-a03c-10f4c691d775",
+              "name": "after_id",
+              "value": 0,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        752,
+        640
+      ],
+      "id": "5b03a96d-cc39-4d91-92b5-ad7bc3bc1efb",
+      "name": "after_id = 0, bypass batch_size"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        384
+      ],
+      "id": "fb5b7c7d-cd33-4acf-8170-efd317b1f03e",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d063d3ec-3644-461f-a3f9-7fdd427337ea",
+              "name": "item",
+              "value": "={{ $json.items.at(-1) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2416,
+        384
+      ],
+      "id": "c6bd1227-cb24-4f17-bbb9-7bf024d31aa9",
+      "name": "Take last item"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3104,
+        784
+      ],
+      "id": "5b63cd0f-caa7-4fef-aee1-b44d465baf12",
+      "name": "Merge contact and associated company"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "70dd7509-79d1-4eb3-8756-665974dd0694",
+              "leftValue": "={{ $json.results[0].properties.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ffa1c771-f685-4807-9ede-21f7743df28f",
+              "leftValue": "={{ $json.results[0].properties.industry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "72d74a05-bcc3-48f1-9c4e-7c3b9b768edb",
+              "leftValue": "={{ $json.results[0].properties.numberofemployees }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8aee527e-9f2c-456e-a8a6-0b50770c91f3",
+              "leftValue": "={{ $json.results[0].properties.annualrevenue }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "08e6a3f6-4874-4020-bea8-8c741a31a27a",
+              "leftValue": "={{ $json.results[0].properties.founded_year }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "2adc11fe-04a3-438d-9fdd-59cae011c033",
+              "leftValue": "={{ $json.results[0].properties.country }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2688,
+        1008
+      ],
+      "id": "52c413ef-51b8-40f2-ac88-e1b1e76d5563",
+      "name": "If all required Company fields have value"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e011c382-bade-4dd8-8d2a-ed62189079fd",
+              "leftValue": "={{ $json.properties.firstname }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7eeecdd8-2b87-4a1f-85fd-f7f32e8c2dfd",
+              "leftValue": "={{ $json.properties.lastname }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "0d5d5ccd-c3d7-4b70-8725-10241f724ef6",
+              "leftValue": "={{ $json.properties.hs_seniority }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e4e705ec-ce6f-4313-997d-52388c6963a9",
+              "leftValue": "={{ $json.properties.hs_role }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f64390ec-d197-4aff-b1f6-ffe5e8713034",
+              "leftValue": "={{ $json.properties.hs_sub_role }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e17289a8-ceb5-4f1d-8a9c-776e617aeca0",
+              "leftValue": "={{ $json.properties.work_experience }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1568,
+        592
+      ],
+      "id": "6089912a-a536-468c-b70a-a88f62626160",
+      "name": "Filter contacts with missing field values",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        160
+      ],
+      "id": "449d5bda-13d2-4dfd-8aff-51ad4657e23b",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c7d311b7-a084-4604-b2f5-5fa5f2f2f625",
+              "name": "after_id",
+              "value": "={{ $json.items.at(-1).id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1824,
+        160
+      ],
+      "id": "caf9f764-6f60-4fb8-820b-73bf73196660",
+      "name": "Take last item id as after_id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\n$input.first().json[\"batch_size\"] = staticData.batch_size;\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        160
+      ],
+      "id": "a0f97188-cf4a-4c4a-89f9-6a31f30b9fbc",
+      "name": "Merge batch_size"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3952,
+        224
+      ],
+      "id": "bbbf1718-c790-4f11-a67e-4833ec94b5fb",
+      "name": "Get next portion of contacts with input 1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb1a2227-462a-40df-ac95-5e850067b1d2",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1360,
+        720
+      ],
+      "id": "288e1d1c-98c1-45c8-99a8-35305ac2e208",
+      "name": "If are some contacts"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a19df3e4-c851-4b55-b256-3d947df99ae7",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1760,
+        592
+      ],
+      "id": "2537de3b-2c8f-41d1-8216-f89fbe384252",
+      "name": "If no contacts"
+    },
+    {
+      "parameters": {
+        "amount": 0.2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        640
+      ],
+      "id": "ca04c8bc-cbc6-4460-8cfa-e4434009f8b6",
+      "name": "Wait 200 ms1",
+      "webhookId": "5b43af7f-29fb-4769-8109-6a282f5d6231"
+    },
+    {
+      "parameters": {
+        "content": "## Contacts choice for role classification\nWorkflow fetches contacts for classification according to the following requirements and rules. \n\nIt stops when necessary amount of contacts are collected for a batch or no more contacts are returned from HubSpot.\n\n### Requirements\n* Even with parallel executions each new role classification run should work with newly added records only\n* PostgreSQL and HubSpot states should be eventually consistent\n* Upload of the roles to HubSpot sholud be a decoupled process with own retries logic to handle network issues\n\n### Rules\n1. have contact record in PostgreSQL and not soft deleted -> skip the contact\n2. added new record or dropped soft delete flag -> should classify only them, bumping classification attempt counter\n3. soft delete contact records which have no classified roles more then 7 min <- to allow crashed classifications to restart (one classification runs ~2 min)\n\n## Debugging\n\nHubSpot contact or company ID can be traced to this workflow through the `get_contacts_for_enrichment_executions` table.\n",
+        "height": 571,
+        "width": 646
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "97b546c1-8bbc-42af-b8fd-671dc8f65a8e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "value": "={{ $json.properties.work_experience }}",
+        "dataPropertyName": "work_experience_md5"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        2896,
+        688
+      ],
+      "id": "3d7292ba-702a-4c9f-a39c-96b9092b3e11",
+      "name": "add MD5 work_experience"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1e223732-815a-4749-8cb2-e46d76463ca7",
+              "leftValue": "={{ Number($json.count) }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3968,
+        768
+      ],
+      "id": "efb4e0c0-3942-441f-8ca6-5f77a7b3e48f",
+      "name": "If contact + company already persisted"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*), ct.id as contact_id, ct.company_id as company_id, ct.soft_deleted FROM contacts AS ct LEFT JOIN companies AS cmp ON ct.company_id = cmp.id WHERE \n  ct.soft_deleted = FALSE AND\n  ct.crm_id = $1 AND\n  ct.first_name = $2 AND\n  ct.last_name = $3 AND\n  ct.employment_seniority = $4 AND\n  ct.employment_role = $5 AND\n  ct.employment_sub_role = $6 AND\n  ct.work_experience_md5 = $7 AND\n  cmp.crm_id = $8 AND\n  cmp.industry = $9 AND\n  cmp.number_of_employees = $10 AND\n  cmp.annual_revenue = $11 AND\n  cmp.year_founded = $12 AND\n  cmp.company_name = $13\nGROUP BY ct.id\n",
+        "options": {
+          "queryReplacement": "={{ [Number($json.contact.id), $json.contact.properties.firstname, $json.contact.properties.lastname, $json.contact.properties.hs_seniority, $json.contact.properties.hs_role, $json.contact.properties.hs_sub_role, $json.contact.work_experience_md5, Number($json.contact.associated_company.id), $json.contact.associated_company.properties.industry, Number($json.contact.associated_company.properties.numberofemployees), $json.contact.associated_company.properties.annualrevenue, Number($json.contact.associated_company.properties.founded_year), $json.contact.associated_company.properties.name] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3520,
+        576
+      ],
+      "id": "4d25dc4f-ee97-436b-b6b4-0fae9fedf610",
+      "name": "Find Contact + Company not soft deleted",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "//\n// The query inserts contacts and associated companies into database if they do not exist. And updates soft deleted contacts as Not deleted.\n// \n// Compares contacts and companies as value objects, using all properties.\n// Skips company insertion if it's already exists.\n// Skips contacts that are not soft deleted.\n//\n// Returns inserted or updated contacts with associated companies for further processing.\n// Returns empty response if contacts are null or empty.\n//\n\n// Columns that should be cast to INTEGER\nconst integerColumns = new Set([\n  'number_of_employees',\n  'year_founded',\n  'company_id'\n]);\n\n// Columns that should be cast to BIGINT\nconst bigintColumns = new Set([\n  'crm_id'\n]);\n\n// Company columns mapping\nconst companyColumns = [\n  'crm_id',\n  'annual_revenue',\n  'country',\n  'year_founded',\n  'industry',\n  'company_name',\n  'number_of_employees'\n];\n\n// Contact columns mapping\nconst contactColumns = [\n  'crm_id',\n  'first_name',\n  'employment_role',\n  'employment_seniority',\n  'employment_sub_role',\n  'last_name',\n  'work_experience',\n  'work_experience_md5'\n];\n\n/**\n * Casts a parameter to the appropriate type\n * @param {string} param - Parameter placeholder (e.g., '$1')\n * @param {string} col - Column name\n * @returns {string} Casted parameter or original parameter\n */\nfunction castParam(param, col) {\n  if (bigintColumns.has(col)) {\n    return `${param}::BIGINT`;\n  } else if (integerColumns.has(col)) {\n    return `${param}::INTEGER`;\n  }\n  return param;\n}\n\n/**\n * Casts both column and parameter for WHERE conditions\n * @param {string} col - Column name\n * @param {string} param - Parameter placeholder (e.g., '$1')\n * @returns {Object} Object with castColumn and castValue properties\n */\nfunction castColumnAndParam(col, param) {\n  let castValue = param;\n  let castColumn = col;\n  \n  if (bigintColumns.has(col)) {\n    castValue = `${param}::BIGINT`;\n    castColumn = `${col}::BIGINT`;\n  } else if (integerColumns.has(col)) {\n    castValue = `${param}::INTEGER`;\n    castColumn = `${col}::INTEGER`;\n  }\n  \n  return { castColumn, castValue };\n}\n\n/**\n * Generates a SQL transaction to upsert contacts and companies using parameterized queries\n * @param {Array} contacts - Array of contact objects with associated_company property\n * @returns {string} SQL transaction text with $1, $2, $3... placeholders\n */\nfunction generateUpsertSQL(contacts) {\n  if (!contacts || contacts.length === 0) {\n    return '';\n  }\n\n  const sqlStatements = ['BEGIN;'];\n  \n  // Create temporary table to store results\n  sqlStatements.push(`\nCREATE TEMPORARY TABLE temp_upserted_contacts (\n  contact_id INTEGER,\n  company_id INTEGER\n) ON COMMIT DROP;\n`);\n  \n  let paramIndex = 1;\n  \n  for (const contact of contacts) {\n    // Map company data - track parameter indices\n    const companyParamIndices = companyColumns.map(() => paramIndex++);\n    \n    const companyWhereConditions = companyColumns.map((col, idx) => {\n      const param = `$${companyParamIndices[idx]}`;\n      const { castColumn, castValue } = castColumnAndParam(col, param);\n      return `${castColumn} = ${castValue}`;\n    }).join(' AND ');\n\n    const companyInsertParams = companyColumns.map((col, idx) => {\n      const param = `$${companyParamIndices[idx]}`;\n      return castParam(param, col);\n    }).join(', ');\n\n    // Map contact data - track parameter indices\n    const contactParamIndices = contactColumns.map(() => paramIndex++);\n    \n    const contactWhereConditions = contactColumns.map((col, idx) => {\n      const param = `$${contactParamIndices[idx]}`;\n      const { castColumn, castValue } = castColumnAndParam(col, param);\n      return `${castColumn} = ${castValue}`;\n    }).join(' AND ');\n\n    const contactInsertParams = contactColumns.map((col, idx) => {\n      const param = `$${contactParamIndices[idx]}`;\n      return castParam(param, col);\n    }).join(', ');\n\n    const contactUpsertSQL = `\nDO $body$\nDECLARE\n  v_company_id INTEGER;\n  v_existing_contact_id INTEGER;\n  v_is_soft_deleted BOOLEAN;\n  v_was_updated BOOLEAN := false;\nBEGIN\n  -- Get or insert company\n  WITH existing_company AS (\n    SELECT id FROM companies \n    WHERE ${companyWhereConditions}\n    LIMIT 1\n  ),\n  inserted_company AS (\n    INSERT INTO companies (${companyColumns.join(', ')}, inserted_at)\n    SELECT ${companyInsertParams}, NOW()\n    WHERE NOT EXISTS (SELECT 1 FROM existing_company)\n    RETURNING id\n  )\n  SELECT COALESCE(\n    (SELECT id FROM existing_company),\n    (SELECT id FROM inserted_company)\n  ) INTO v_company_id;\n  \n  -- Check if contact exists (match by all fields except soft_deleted, including company_id)\n  SELECT id, soft_deleted INTO v_existing_contact_id, v_is_soft_deleted\n  FROM contacts \n  WHERE ${contactWhereConditions} AND company_id::INTEGER = v_company_id::INTEGER\n  LIMIT 1;\n  \n  IF v_existing_contact_id IS NOT NULL THEN\n    -- Contact exists, update soft_deleted if needed\n    IF v_is_soft_deleted = true THEN\n      UPDATE contacts \n      SET soft_deleted = false,\n          classification_attempts = classification_attempts + 1,\n          updated_at = NOW()\n      WHERE id = v_existing_contact_id;\n      v_was_updated := true;\n    END IF;\n  ELSE\n    -- Contact doesn't exist, insert it\n    INSERT INTO contacts (${contactColumns.join(', ')}, company_id, soft_deleted, classification_attempts, inserted_at, updated_at)\n    VALUES (${contactInsertParams}, v_company_id, false, 1, NOW(), NOW())\n    RETURNING id INTO v_existing_contact_id;\n    v_was_updated := true;\n  END IF;\n  \n  -- Store the result if contact was inserted or updated\n  IF v_was_updated THEN\n    INSERT INTO temp_upserted_contacts (contact_id, company_id)\n    VALUES (v_existing_contact_id, v_company_id);\n  END IF;\nEND $body$`;\n\n    sqlStatements.push(contactUpsertSQL + ';');\n  }\n\n  // Select all inserted/updated contacts with their companies\n  sqlStatements.push(`\nSELECT \n  c.id as contact_id,\n  c.crm_id as contact_crm_id,\n  c.first_name as contact_first_name,\n  c.employment_role as contact_employment_role,\n  c.employment_seniority as contact_employment_seniority,\n  c.employment_sub_role as contact_employment_sub_role,\n  c.last_name as contact_last_name,\n  c.work_experience as contact_work_experience,\n  c.work_experience_md5 as contact_work_experience_md5,\n  c.company_id as contact_company_id,\n  c.soft_deleted as contact_soft_deleted,\n  c.classification_attempts as contact_classification_attempts,\n  c.inserted_at as contact_inserted_at,\n  comp.id as company_id,\n  comp.crm_id as company_crm_id,\n  comp.annual_revenue as company_annual_revenue,\n  comp.country as company_country,\n  comp.year_founded as company_year_founded,\n  comp.industry as company_industry,\n  comp.company_name as company_company_name,\n  comp.number_of_employees as company_number_of_employees,\n  comp.inserted_at as company_inserted_at\nFROM temp_upserted_contacts tuc\nJOIN contacts c ON c.id = tuc.contact_id\nJOIN companies comp ON comp.id = tuc.company_id;\n`);\n  \n  sqlStatements.push('COMMIT;');\n  \n  return sqlStatements.join('\\n\\n');\n}\n\n/**\n * Generates array of values matching the parameter indices in generateUpsertSQL\n * @param {Array} contacts - Array of contact objects with associated_company property\n * @returns {Array} Flat array of values in order matching $1, $2, $3... parameters\n */\nfunction generateParamValues(contacts) {\n  if (!contacts || contacts.length === 0) {\n    return [];\n  }\n\n  const values = [];\n  \n  for (const contact of contacts) {\n    const contactProps = contact.properties;\n    const companyProps = contact.associated_company.properties;\n    \n    // Company values in order\n    values.push(\n      contact.associated_company.id,           // crm_id\n      companyProps.annualrevenue,              // annual_revenue\n      companyProps.country,                    // country\n      companyProps.founded_year,               // year_founded\n      companyProps.industry,                   // industry\n      companyProps.name,                       // company_name\n      companyProps.numberofemployees           // number_of_employees\n    );\n    \n    // Contact values in order\n    values.push(\n      contact.id,                              // crm_id\n      contactProps.firstname,                  // first_name\n      contactProps.hs_role,                    // employment_role\n      contactProps.hs_seniority,               // employment_seniority\n      contactProps.hs_sub_role,                // employment_sub_role\n      contactProps.lastname,                   // last_name\n      contactProps.work_experience,            // work_experience\n      contact.work_experience_md5              // work_experience_md5\n    );\n  }\n  \n  return values;\n}\n\nconst contacts = $input.first().json.contacts;\nvar query = generateUpsertSQL(contacts);\nvar paramValues = generateParamValues(contacts);\n\nif (paramValues.length == 0) {\n  return [];\n}\n\nreturn [{\"sql_query\": query, \"paramValues\": paramValues}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4560,
+        400
+      ],
+      "id": "f7b51e90-f91f-4afc-871a-6ee88ba075a3",
+      "name": "Prepare PostgreSQL upsert query"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        544,
+        640
+      ],
+      "id": "4bcc5f2e-ebab-4876-bb2e-4e0119dbc93c",
+      "name": "Choose Input 1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE get_contacts_for_enrichment_executions\nSET contacts = COALESCE(contacts, '[]'::jsonb) || jsonb_build_array($2::jsonb)\nWHERE execution_id = $1\nRETURNING jsonb_array_length(contacts) AS contacts_length, batch_size",
+        "options": {
+          "queryReplacement": "={{ [$execution.id, $json.contact] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4240,
+        864
+      ],
+      "id": "8df53fac-27c8-4f6d-a4e2-c5b984ad2e0e",
+      "name": "Accumulate contact, return length and batch_size",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT $1 as execution_id, contacts FROM get_contacts_for_enrichment_executions WHERE execution_id::text = $1",
+        "options": {
+          "queryReplacement": "={{ [String($execution.id)] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4352,
+        400
+      ],
+      "id": "3b34bcfa-f9c4-4c9e-8532-a6fb68f0f02c",
+      "name": "Get accumulated contacts",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.sql_query }}",
+        "options": {
+          "queryReplacement": "={{ $json.paramValues }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4768,
+        400
+      ],
+      "id": "11878ed8-dbae-4cc9-bbdf-5883c5f0fe84",
+      "name": "Upsert contacts and associated companies",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "operation": "search",
+        "limit": "={{ $json.batch_size }}",
+        "filterGroupsUi": {
+          "filterGroupsValues": [
+            {
+              "filtersUi": {
+                "filterValues": [
+                  {
+                    "propertyName": "middic_possible_role|string",
+                    "operator": "NOT_HAS_PROPERTY"
+                  },
+                  {
+                    "propertyName": "meddic_role|enumeration",
+                    "operator": "NOT_HAS_PROPERTY"
+                  },
+                  {
+                    "propertyName": "work_experience|string",
+                    "operator": "HAS_PROPERTY"
+                  },
+                  {
+                    "propertyName": "hs_object_id|number",
+                    "operator": "GT",
+                    "value": "={{ $json.after_id }}"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "direction": "ASCENDING",
+          "properties": [
+            "firstname",
+            "lastname",
+            "hs_seniority",
+            "hs_role",
+            "hs_sub_role",
+            "work_experience"
+          ],
+          "sortBy": "hs_object_id"
+        }
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        640
+      ],
+      "id": "03c3031c-51ca-46e5-b103-3f78ad680745",
+      "name": "Search contacts with no possible and clarified roles + has work experience",
+      "alwaysOutputData": true,
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "19rgyrjHjOQOxSNo",
+          "name": "HubSpot App Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "64bfe8be-2901-401b-915f-c15125799056",
+              "name": "batch_size",
+              "value": 10,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        640
+      ],
+      "id": "3d26568e-0245-4ea9-bd8e-c8770c39d641",
+      "name": "Set batch_size"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO get_contacts_for_enrichment_executions (execution_id, batch_size) VALUES ($1, $2) RETURNING execution_id",
+        "options": {
+          "queryReplacement": "={{ [$execution.id, $json.batch_size] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        352,
+        736
+      ],
+      "id": "0659ddda-7ce5-4cb5-8b2c-c9b6946ef71a",
+      "name": "Persist batch_size",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COALESCE(jsonb_array_length(contacts), 0)::INTEGER AS contacts_length, batch_size FROM get_contacts_for_enrichment_executions WHERE execution_id = $1;",
+        "options": {
+          "queryReplacement": "={{ $execution.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4240,
+        672
+      ],
+      "id": "3ae83ff5-9b6d-49d8-9b24-6a205af50905",
+      "name": "Get contacts length and batch_size",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3744,
+        768
+      ],
+      "id": "f0113fea-c3f1-46e3-97b6-4d986c2e07a6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "48ba1df6-4b92-45b5-a30f-6f7e3d493246",
+              "name": "contact",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3296,
+        784
+      ],
+      "id": "46e462d6-215c-4a8d-b3a4-d9c440d93f22",
+      "name": "Wrap contact"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Set batch_size",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search for companies of the contact": {
+      "main": [
+        [
+          {
+            "node": "If only one company per contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 200 ms": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take company": {
+      "main": [
+        [
+          {
+            "node": "Merge contact and associated company",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If only one company per contact": {
+      "main": [
+        [
+          {
+            "node": "If all required Company fields have value",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 200 ms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Contacts": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search for companies of the contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "add MD5 work_experience",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If last item and less contacts than batch_size": {
+      "main": [
+        [
+          {
+            "node": "Get next portion of contacts with input 1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Get accumulated contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "after_id = 0, bypass batch_size": {
+      "main": [
+        [
+          {
+            "node": "Wait 200 ms1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Take last item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take last item": {
+      "main": [
+        [
+          {
+            "node": "If last item and less contacts than batch_size",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge contact and associated company": {
+      "main": [
+        [
+          {
+            "node": "Wrap contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If all required Company fields have value": {
+      "main": [
+        [
+          {
+            "node": "Take company",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 200 ms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter contacts with missing field values": {
+      "main": [
+        [
+          {
+            "node": "If no contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Take last item id as after_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take last item id as after_id": {
+      "main": [
+        [
+          {
+            "node": "Merge batch_size",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge batch_size": {
+      "main": [
+        [
+          {
+            "node": "Get next portion of contacts with input 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get next portion of contacts with input 1": {
+      "main": [
+        [
+          {
+            "node": "Wait 200 ms1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If are some contacts": {
+      "main": [
+        [
+          {
+            "node": "Filter contacts with missing field values",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get accumulated contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If no contacts": {
+      "main": [
+        [
+          {
+            "node": "Get next portion of contacts with input 1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 200 ms1": {
+      "main": [
+        [
+          {
+            "node": "Search contacts with no possible and clarified roles + has work experience",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "add MD5 work_experience": {
+      "main": [
+        [
+          {
+            "node": "Merge contact and associated company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If contact + company already persisted": {
+      "main": [
+        [
+          {
+            "node": "Get contacts length and batch_size",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Accumulate contact, return length and batch_size",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Contact + Company not soft deleted": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare PostgreSQL upsert query": {
+      "main": [
+        [
+          {
+            "node": "Upsert contacts and associated companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose Input 1": {
+      "main": [
+        [
+          {
+            "node": "after_id = 0, bypass batch_size",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accumulate contact, return length and batch_size": {
+      "main": [
+        [
+          {
+            "node": "Wait 200 ms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get accumulated contacts": {
+      "main": [
+        [
+          {
+            "node": "Prepare PostgreSQL upsert query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search contacts with no possible and clarified roles + has work experience": {
+      "main": [
+        [
+          {
+            "node": "If are some contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set batch_size": {
+      "main": [
+        [
+          {
+            "node": "Persist batch_size",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Choose Input 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist batch_size": {
+      "main": [
+        [
+          {
+            "node": "Choose Input 1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get contacts length and batch_size": {
+      "main": [
+        [
+          {
+            "node": "Wait 200 ms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If contact + company already persisted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrap contact": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Find Contact + Company not soft deleted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "91f8b2c1-811e-44f1-9819-a9afdaff1063",
+  "activeVersionId": "91f8b2c1-811e-44f1-9819-a9afdaff1063",
+  "versionCounter": 9,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-01-06T08:58:59.869Z",
+      "createdAt": "2026-01-06T08:58:59.869Z",
+      "role": "workflow:owner",
+      "workflowId": "oGBWJa-xD8EBisfRpf0jh",
+      "projectId": "HbDRwYWNz9gHlL39",
+      "project": {
+        "updatedAt": "2026-01-06T00:02:06.543Z",
+        "createdAt": "2026-01-06T00:01:48.834Z",
+        "id": "HbDRwYWNz9gHlL39",
+        "name": "First Last <test@example.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "352b51df-4987-4bf5-9076-d287a2629321"
+      }
+    }
+  ]
+}

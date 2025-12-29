@@ -1,0 +1,289 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "n8n Workflow Schema",
+    "description": "JSON Schema for n8n workflow files used in MEDDIC Roles AI Agent system",
+    "type": "object",
+    "required": [
+        "id",
+        "name",
+        "active",
+        "isArchived",
+        "nodes",
+        "connections",
+        "settings"
+    ],
+    "properties": {
+        "updatedAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp of last update"
+        },
+        "createdAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp of creation"
+        },
+        "id": {
+            "type": "string",
+            "description": "Unique workflow identifier"
+        },
+        "name": {
+            "type": "string",
+            "description": "Human-readable workflow name"
+        },
+        "description": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "Optional workflow description"
+        },
+        "active": {
+            "type": "boolean",
+            "description": "Whether workflow is active/enabled"
+        },
+        "isArchived": {
+            "type": "boolean",
+            "description": "Whether workflow is archived"
+        },
+        "nodes": {
+            "type": "array",
+            "description": "Array of workflow nodes (execution units)",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique node identifier (UUID)"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Human-readable node name"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Node type identifier (e.g., 'n8n-nodes-base.httpRequest')"
+                    },
+                    "typeVersion": {
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "description": "Version of the node type"
+                    },
+                    "position": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "description": "Canvas position [x, y]"
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "description": "Node configuration parameters (varies by node type)",
+                        "additionalProperties": true
+                    },
+                    "credentials": {
+                        "type": "object",
+                        "description": "Credentials reference for authenticated nodes",
+                        "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "alwaysOutputData": {
+                        "type": "boolean",
+                        "description": "Whether node always outputs data"
+                    },
+                    "retryOnFail": {
+                        "type": "boolean",
+                        "description": "Whether to retry on failure"
+                    },
+                    "webhookId": {
+                        "type": "string",
+                        "description": "Optional webhook identifier for wait nodes"
+                    }
+                }
+            }
+        },
+        "connections": {
+            "type": "object",
+            "description": "Maps node outputs to inputs, defining workflow execution flow",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "main": {
+                        "type": "array",
+                        "description": "Primary output connections",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "required": [
+                                    "node",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "node": {
+                                        "type": "string",
+                                        "description": "Target node name"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "main"
+                                        ],
+                                        "description": "Connection type"
+                                    },
+                                    "index": {
+                                        "type": "number",
+                                        "description": "Input index on target node"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "settings": {
+            "type": "object",
+            "description": "Workflow-level settings",
+            "properties": {
+                "executionOrder": {
+                    "type": "string",
+                    "enum": [
+                        "v1"
+                    ],
+                    "description": "Execution order version"
+                },
+                "availableInMCP": {
+                    "type": "boolean",
+                    "description": "Whether available in Multi-Channel Platform"
+                }
+            }
+        },
+        "staticData": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "description": "Static data persisted across executions",
+            "additionalProperties": true
+        },
+        "meta": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "description": "Optional metadata object"
+        },
+        "pinData": {
+            "type": "object",
+            "description": "Pinned node data for testing/debugging",
+            "additionalProperties": {
+                "type": "array"
+            }
+        },
+        "versionId": {
+            "type": "string",
+            "description": "UUID of current workflow version"
+        },
+        "activeVersionId": {
+            "type": "string",
+            "description": "UUID of the active/published version"
+        },
+        "versionCounter": {
+            "type": "integer",
+            "description": "Incremental version number"
+        },
+        "triggerCount": {
+            "type": "integer",
+            "description": "Number of trigger nodes in workflow"
+        },
+        "tags": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Workflow tags for organization"
+        },
+        "shared": {
+            "type": "array",
+            "description": "Sharing/permission entries",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "updatedAt": {
+                        "type": "string",
+                        "description": "ISO 8601 timestamp"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "description": "ISO 8601 timestamp"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "workflow:owner"
+                        ]
+                    },
+                    "workflowId": {
+                        "type": "string"
+                    },
+                    "projectId": {
+                        "type": "string"
+                    },
+                    "project": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "type": "string"
+                            },
+                            "icon": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "description": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "createdAt": {
+                                "type": "string",
+                                "description": "ISO 8601 timestamp"
+                            },
+                            "updatedAt": {
+                                "type": "string",
+                                "description": "ISO 8601 timestamp"
+                            },
+                            "creatorId": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

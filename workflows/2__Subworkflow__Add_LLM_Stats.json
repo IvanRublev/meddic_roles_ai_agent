@@ -1,0 +1,512 @@
+{
+  "updatedAt": "2026-01-06T00:02:54.633Z",
+  "createdAt": "2026-01-06T00:02:54.633Z",
+  "id": "JPusjJjSIxVfTNjRY1XHp",
+  "name": "2. Subworkflow: Add LLM Stats",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "let llm_response = $input.first().json.llm_response;\nlet duration = llm_response.completed_at - llm_response.created_at;\n\nreturn {\"llm_request_duration_sec\": duration};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        416
+      ],
+      "id": "15154be3-e775-4791-aced-89126ebf96c3",
+      "name": "Calculate Duration Org"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1248,
+        496
+      ],
+      "id": "1e5fd842-7e28-4469-82f4-8daa1588e701",
+      "name": "Merge7"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "llm_request_name"
+            },
+            {
+              "name": "llm_response",
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "id": "de584728-a2a7-454e-894c-067fbb097ae8",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -592,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let llm_response = $input.first().json.llm_response;\nlet llm_prices = $input.first().json.llm_prices;\nlet tokens_in = llm_response.usage.input_tokens;\nlet tokens_out = llm_response.usage.output_tokens + llm_response.usage.output_tokens_details.reasoning_tokens;\nlet tokens_cached = llm_response.usage.input_tokens_details.cached_tokens;\n\nlet cost = tokens_in * llm_prices.input_tokens_price + tokens_out * llm_prices.output_tokens_price + tokens_cached * llm_prices.input_cached_tokens_price;\n\nreturn {\n  \"llm_request_tokens_in\": tokens_in,\n  \"llm_request_tokens_out\": tokens_out,\n  \"llm_request_tokens_cached\": tokens_cached,\n  \"llm_request_cost_usd\": cost\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        224
+      ],
+      "id": "5adeabe8-a2f1-4331-84c5-acf0fb9f73b0",
+      "name": "Count In/Out Tokens Cost"
+    },
+    {
+      "parameters": {
+        "url": "https://www.llm-prices.com/current-v1.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7a7db51d-6eb7-4033-a15a-eea16824542a",
+      "name": "Get LLM prices"
+    },
+    {
+      "parameters": {
+        "jsCode": "let model = \"gpt-5-nano\";\nlet price_factor = 1000000;\n\nfor (const item of ($input.first().json.prices)) {\n  if (item.id == model) {\n    return {\"llm_prices\": \n              {\n                \"input_tokens_price\": item.input / price_factor,\n                \"output_tokens_price\": item.output / price_factor,\n                \"input_cached_tokens_price\": item.output / price_factor\n              }\n           }\n  }\n}\n\nthrow new Error(`Price information not found for model: ${model}`);\n\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c3e635ff-8bd2-489d-bd44-4506d34aca90",
+      "name": "Take gpt-5-nano prices"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        224
+      ],
+      "id": "88a276e7-26b9-4076-87ed-e5d5630158a5",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c52db69f-7577-47e2-8f9e-6064522cafc5",
+              "leftValue": "={{ $json.llm_prices }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        80
+      ],
+      "id": "e3104df8-e2d7-489e-a5d3-da7a7fae6743",
+      "name": "If no prices"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        624,
+        16
+      ],
+      "id": "0bcd074e-7a34-4391-a28a-7fe8163c7e67",
+      "name": "Bypass input 1"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "llm_prices",
+          "mode": "list",
+          "cachedResultName": "llm_prices"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "llm_prices": "={{ $json.llm_prices }}",
+            "inserted_at": "={{ $now.toUTC() }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "llm_prices",
+              "displayName": "llm_prices",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "inserted_at",
+              "displayName": "inserted_at",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        112
+      ],
+      "id": "acc546b3-52e6-4d06-950a-bbf65e6804be",
+      "name": "Insert Prices",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM llm_prices\nWHERE inserted_at >= (now() - interval '24 hours')\nORDER BY id DESC\nLIMIT 1;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -368,
+        80
+      ],
+      "id": "ceac6d19-1253-4bca-957f-17588adb219b",
+      "name": "Query Last Prices",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Calculate Duration Org": {
+      "main": [
+        [
+          {
+            "node": "Merge7",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Calculate Duration Org",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Query Last Prices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge7",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Count In/Out Tokens Cost": {
+      "main": [
+        [
+          {
+            "node": "Merge7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get LLM prices": {
+      "main": [
+        [
+          {
+            "node": "Take gpt-5-nano prices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Count In/Out Tokens Cost",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take gpt-5-nano prices": {
+      "main": [
+        [
+          {
+            "node": "Insert Prices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bypass input 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If no prices": {
+      "main": [
+        [
+          {
+            "node": "Get LLM prices",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bypass input 1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Prices": {
+      "main": [
+        [
+          {
+            "node": "Bypass input 1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Query Last Prices": {
+      "main": [
+        [
+          {
+            "node": "If no prices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "llm_request_name": "org",
+          "llm_response": {
+            "id": "resp_0ba28336704a708d006957cd7dcd1c8195b69da3bb7f4300ce",
+            "object": "response",
+            "created_at": 1767361917,
+            "status": "completed",
+            "background": false,
+            "billing": {
+              "payer": "developer"
+            },
+            "completed_at": 1767362013,
+            "error": null,
+            "incomplete_details": null,
+            "instructions": null,
+            "max_output_tokens": null,
+            "max_tool_calls": null,
+            "model": "gpt-5-nano-2025-08-07",
+            "output": [
+              {
+                "id": "rs_0ba28336704a708d006957cd7e27d481958927f9103ae715f2",
+                "type": "reasoning",
+                "summary": []
+              },
+              {
+                "id": "msg_0ba28336704a708d006957cdd668e48195885dbffc24866b69",
+                "type": "message",
+                "status": "completed",
+                "content": [
+                  {
+                    "type": "output_text",
+                    "annotations": [],
+                    "logprobs": [],
+                    "text": "**ORGANIZATIONAL HYPOTHESIS** (Confidence: 65%)  \nAt 89-person companies in Entertainment Providers with ~$36.8M revenue, the typical executive structure for billing/finance decisions is:\n\n- **Budget Approval Authority:**  \n  - $0-50K: Billing/Revenue Operations Manager or Finance Manager; manages day-to-day SaaS spend and can approve smaller subscriptions within established spend policies.  \n  - $50-150K: VP Finance or Director of Finance (often with CFO oversight); this range covers mid-sized, strategic SaaS purchases and requires senior financial sign-off.  \n  - $150K+: CFO (or occasionally CEO in lean orgs); final sign-off on large, strategic platforms or contracts, especially when there are long-term commitments or security/compliance considerations.\n\n- **Relevant Function Structure:**  \n  The Finance/RevOps organization typically reports to the CFO or VP Finance and includes Revenue Operations/Billing, Controller/Accounting, FP&A, and Accounts Payable. For an $80-100K billing infrastructure purchase, the likely approval chain is: Revenue/ Billing lead → Finance Manager/Controller → CFO → (potentially Legal/Procurement) → (occasionally CEO for very tight timetables).\n\n- **Decision-Making Style:**  \n  Committee-based with cross-functional input (Finance/RevOps, IT/Security, Legal) for enterprise software purchases in this segment.\n\n**KEY ASSUMPTIONS** (What we don't know but are inferring):  \n1) There is an active CFO or VP Finance and a Finance/RevOps function handling vendor approvals.  \n2) A cross-functional review is common (Finance, IT/Security, and Legal may be involved).  \n3) The $80-100K range trigger typically requires senior financial sign-off, with longer lead times if security/compliance reviews are needed.\n\n**CONFIDENCE BREAKDOWN:**  \n- Overall: 65%  \n- Approval thresholds: 60%  \n- Reporting structure: 60%  \n- Decision-making style: 60%\n\n**RED FLAGS** (Signs this hypothesis may be wrong):  \n- If there is no CFO/VP Finance or formal finance function and the CEO/Founder signs off on mid-market SaaS without a defined procurement process.  \n- If there is no cross-functional involvement (Finance, IT/Security, Legal) and procurement decisions are handled solely by a single person or a non-finance-led team."
+                  }
+                ],
+                "role": "assistant"
+              }
+            ],
+            "parallel_tool_calls": true,
+            "previous_response_id": null,
+            "prompt_cache_key": null,
+            "prompt_cache_retention": null,
+            "reasoning": {
+              "effort": "high",
+              "summary": null
+            },
+            "safety_identifier": null,
+            "service_tier": "default",
+            "store": true,
+            "temperature": 1,
+            "text": {
+              "format": {
+                "type": "text"
+              },
+              "verbosity": "low"
+            },
+            "tool_choice": "auto",
+            "tools": [],
+            "top_logprobs": 0,
+            "top_p": 1,
+            "truncation": "disabled",
+            "usage": {
+              "input_tokens": 610,
+              "input_tokens_details": {
+                "cached_tokens": 0
+              },
+              "output_tokens": 7929,
+              "output_tokens_details": {
+                "reasoning_tokens": 7424
+              },
+              "total_tokens": 8539
+            },
+            "user": null,
+            "metadata": {}
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "07b6564b-39a5-44a0-b1ba-b6dc6faa9818",
+  "activeVersionId": "07b6564b-39a5-44a0-b1ba-b6dc6faa9818",
+  "versionCounter": 4,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-01-06T00:02:54.642Z",
+      "createdAt": "2026-01-06T00:02:54.642Z",
+      "role": "workflow:owner",
+      "workflowId": "JPusjJjSIxVfTNjRY1XHp",
+      "projectId": "HbDRwYWNz9gHlL39",
+      "project": {
+        "updatedAt": "2026-01-06T00:02:06.543Z",
+        "createdAt": "2026-01-06T00:01:48.834Z",
+        "id": "HbDRwYWNz9gHlL39",
+        "name": "First Last <test@example.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "352b51df-4987-4bf5-9076-d287a2629321"
+      }
+    }
+  ]
+}

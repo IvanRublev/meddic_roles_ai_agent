@@ -1,0 +1,30 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDEs
+.idea/
+*.swp
+*.swo
+*.swn
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+*.log
+
+# Research files
+research
+
+# Container data
+container_data/*
+!container_data/.gitkeep
+
+# Linkedin post
+li_post

@@ -1,0 +1,1844 @@
+{
+  "updatedAt": "2026-01-06T09:14:13.101Z",
+  "createdAt": "2026-01-06T08:57:48.205Z",
+  "id": "LuWL1V6afvvZ9tpcqCFzd",
+  "name": "3. MEDDIC Roles AI Agent",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-5-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "reasoning": {
+            "reasoningOptions": {
+              "effort": "high",
+              "summary": "none"
+            }
+          },
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "verbosity": "low",
+              "name": "answer_schema",
+              "schema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"classification\": {\n      \"type\": \"string\",\n      \"enum\": [\"Economic Buyer\", \"Champion\", \"Coach\", \"Irrelevant\"]\n    },\n    \"confidence_score\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"reasoning\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"role_signals\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"seniority_weight\": {\n              \"type\": \"string\",\n              \"description\": \"Explain how seniority level affects classification\"\n            },\n            \"functional_alignment\": {\n              \"type\": \"string\",\n              \"description\": \"How well does their role align with Billo's value prop (finance/ops/product)?\"\n            },\n            \"budget_authority_indicators\": {\n              \"type\": \"string\",\n              \"description\": \"Quote evidence of budget control or strategic decision-making, or 'none found'\"\n            },\n            \"political_capital_indicators\": {\n              \"type\": \"string\",\n              \"description\": \"Quote evidence of executive access, cross-functional influence, project ownership, or 'none found'\"\n            },\n            \"procurement_technical_indicators\": {\n              \"type\": \"string\",\n              \"description\": \"Quote evidence of process knowledge without decision authority, or 'none found'\"\n            }\n          },\n          \"required\": [\n            \"seniority_weight\",\n            \"functional_alignment\",\n            \"budget_authority_indicators\",\n            \"political_capital_indicators\",\n            \"procurement_technical_indicators\"\n          ],\n          \"additionalProperties\": false\n        },\n        \"org_context_consideration\": {\n          \"type\": \"string\",\n          \"description\": \"How does company size/structure affect this classification? Why might standard rules not apply here?\"\n        },\n        \"meddic_logic_application\": {\n          \"type\": \"string\",\n          \"description\": \"Walk through your reasoning: Which MEDDIC indicators are strongest? Which are missing? Why did you choose this classification over alternatives?\"\n        },\n        \"key_evidence_summary\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"List the 2-3 strongest pieces of evidence from Work Experience that drove your decision\"\n        }\n      },\n      \"required\": [\n        \"role_signals\",\n        \"org_context_consideration\",\n        \"meddic_logic_application\",\n        \"key_evidence_summary\"\n      ],\n      \"additionalProperties\": false\n    },\n    \"alternative_classification\": {\n      \"type\": \"string\",\n      \"description\": \"If confidence < 70, what's the second most likely role?\"\n    },\n    \"data_quality_flag\": {\n      \"type\": \"string\",\n      \"enum\": [\"sufficient\", \"sparse\", \"missing_critical_info\"]\n    }\n  },\n  \"required\": [\n    \"classification\",\n    \"confidence_score\",\n    \"reasoning\",\n    \"alternative_classification\",\n    \"data_quality_flag\"\n  ],\n  \"additionalProperties\": false\n}\n",
+              "strict": true
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        3280,
+        736
+      ],
+      "id": "74d43920-c1b1-4a0a-818a-cc78a33fb361",
+      "name": "Classify MEDDIC role",
+      "credentials": {
+        "openAiApi": {
+          "id": "QLMDUQJxxyDwrXHU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2480,
+        880
+      ],
+      "id": "9d8b5f7b-12b8-485a-886d-9411fd6a1c9d",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5664,
+        1120
+      ],
+      "id": "3bb50f0c-963d-4647-b371-b049b31aa9b8",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-5-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "reasoning": {
+            "reasoningOptions": {
+              "effort": "low",
+              "summary": "none"
+            }
+          },
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "verbosity": "low",
+              "name": "reasoning_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"final_version\": {\n      \"type\": \"string\"\n    }\n  },\n  \"additionalProperties\": false,\n  \"required\": [\"final_version\"]\n}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        4704,
+        1104
+      ],
+      "id": "52126ced-1dae-4c30-b6bf-12c4e1dbeffe",
+      "name": "Summarize rationale",
+      "credentials": {
+        "openAiApi": {
+          "id": "QLMDUQJxxyDwrXHU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function capitalize(str) {\n  if (!str) return ''; // handle empty string or falsy input\n  return str.charAt(0).toUpperCase() + str.slice(1);\n}\n\nvar output = $input.first().json;\n\nlet possible_roles = [\"champion\", \"coach\"]\nvar role = $input.first().json.role.trim().toLowerCase();\nlet alternative_role = $input.first().json.alternative_role.trim().toLowerCase();\n\nif (role == \"irrelevant\" && possible_roles.includes(alternative_role)) {\n  role = role + \", maybe \" + capitalize(alternative_role);\n}\n\nReflect.deleteProperty(output, \"alternative_role\");\noutput[\"role\"] = capitalize(role);\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4384,
+        944
+      ],
+      "id": "c3dbec45-c1cb-4899-b2fd-cf1e8d7673da",
+      "name": "Reduce alternative role to irrelevant_maybe_ if applicable"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5296,
+        736
+      ],
+      "id": "69bc6934-dde2-4835-99f7-731dcb1e01af",
+      "name": "Merge LLM Stats"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ba3cdebe-5abc-4f92-9dc2-40e9c35c5845",
+              "name": "contact_fields",
+              "value": "={\n  \"middic_possible_role\": {{ JSON.stringify($json.role) }},\n  \"meddic_possible_role_rationale\": {{ JSON.stringify(\"Confidence score: \" + $json.confidence_score + \", Rationale: \" + $json.rationale ) }}\n}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5824,
+        1232
+      ],
+      "id": "ee8a7903-4016-459a-bdcc-4deb3539e5ea",
+      "name": "Build HubSpot fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "09684182-c6d5-4701-adb4-c5054139f436",
+              "name": "what_we_sell",
+              "value": "We sell Billo is a billing infrastructure platform for B2B software companies launching usage-based pricing. Buyers are typically Finance/Operations executives dealing with revenue leakage and billing complexity. ICP: SaaS companies of 50-600 employees. Deal size: $80K-$100K annually. Decision involves Finance, Product, IT/Engineering, and Procurement.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ee66010d-53cf-4e4f-88c0-cafa904ebe45",
+      "name": "Define what we sell, ICP, Deal Size"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "oGBWJa-xD8EBisfRpf0jh",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/oGBWJa-xD8EBisfRpf0jh",
+          "cachedResultName": "1. Subworkflow: Get HubSpot Contacts for Enrichment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        192
+      ],
+      "id": "aa5194e9-2289-47b8-bd6a-c23306189199",
+      "name": "Get HubSpot Contacts for Enrichment"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9fc1b524-f55b-4346-bf24-bcf2439cd7f2",
+              "name": "contact_id",
+              "value": "={{ $json.contact_id }}",
+              "type": "number"
+            },
+            {
+              "id": "33d28d54-b558-4a4e-a1e2-8b7672dc7c6e",
+              "name": "First Name",
+              "value": "={{ $json.contact_first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "8822120b-9e2d-4032-b0a0-04f8a255ead6",
+              "name": "Last Name",
+              "value": "={{ $json.contact_last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "1ca77747-701e-468b-83ea-e247c6bdde1a",
+              "name": "Employment Seniority",
+              "value": "={{ $json.contact_employment_seniority }}",
+              "type": "string"
+            },
+            {
+              "id": "7983e380-b91c-4145-91d3-9b6c0bfcc3ae",
+              "name": "Employment Role",
+              "value": "={{ $json.contact_employment_role }}",
+              "type": "string"
+            },
+            {
+              "id": "07270ae2-8665-4518-b9ee-586a487bf141",
+              "name": "Employment Sub Role",
+              "value": "={{ $json.contact_employment_sub_role }}",
+              "type": "string"
+            },
+            {
+              "id": "a6fe73d2-1fc0-4862-81b6-2ab3cd9c66f2",
+              "name": "Work Experience",
+              "value": "={{ $json.contact_work_experience }}",
+              "type": "string"
+            },
+            {
+              "id": "3a7c5228-6820-4858-ab4f-ee8e88fdd4ed",
+              "name": "company_id",
+              "value": "={{ $json.company_id }}",
+              "type": "number"
+            },
+            {
+              "id": "d1a22de9-6f50-4930-94a2-e21127b48071",
+              "name": "Industry",
+              "value": "={{ $json.company_industry }}",
+              "type": "string"
+            },
+            {
+              "id": "1ba30c47-3e40-4719-9b69-6df0d300caaa",
+              "name": "Number of Employees",
+              "value": "={{ $json.company_number_of_employees }}",
+              "type": "number"
+            },
+            {
+              "id": "cffba3a9-0a5b-49fc-8543-d8528bc0922d",
+              "name": "Annual Revenue",
+              "value": "=USD {{ $json.company_annual_revenue }}",
+              "type": "string"
+            },
+            {
+              "id": "75fef7a1-ac48-4df7-b055-584bd8836788",
+              "name": "Year Founded",
+              "value": "={{ $json.company_year_founded }}",
+              "type": "number"
+            },
+            {
+              "id": "a440e1d1-a52c-464c-80ba-cdc113ee916c",
+              "name": "Company Name",
+              "value": "={{ $json.company_company_name }}",
+              "type": "string"
+            },
+            {
+              "id": "64cf110d-78ad-4734-b2ba-19c0b98d8b4a",
+              "name": "Country",
+              "value": "={{ $json.company_country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        192
+      ],
+      "id": "b2b721d5-1465-41ab-84d2-a3171f2d2d3b",
+      "name": "Map contact and company fields"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JPusjJjSIxVfTNjRY1XHp",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/JPusjJjSIxVfTNjRY1XHp",
+          "cachedResultName": "2. Subworkflow: Add LLM Stats"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "llm_response": "={{ $json }}",
+            "llm_request_name": "org"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "llm_request_name",
+              "displayName": "llm_request_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "llm_response",
+              "displayName": "llm_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2000,
+        416
+      ],
+      "id": "3f8fb471-3ee9-480d-af6c-82423edce5f0",
+      "name": "Add LLM Stats org"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JPusjJjSIxVfTNjRY1XHp",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/JPusjJjSIxVfTNjRY1XHp",
+          "cachedResultName": "2. Subworkflow: Add LLM Stats"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "llm_response": "={{ $json }}",
+            "llm_request_name": "role"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "llm_request_name",
+              "displayName": "llm_request_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "llm_response",
+              "displayName": "llm_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3552,
+        736
+      ],
+      "id": "426b59b9-4fad-4e2a-9f10-fac1333dc651",
+      "name": "Add LLM Stats role"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JPusjJjSIxVfTNjRY1XHp",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/JPusjJjSIxVfTNjRY1XHp",
+          "cachedResultName": "2. Subworkflow: Add LLM Stats"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "llm_response": "={{ $json }}",
+            "llm_request_name": "rationale"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "llm_request_name",
+              "displayName": "llm_request_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "llm_response",
+              "displayName": "llm_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4976,
+        1104
+      ],
+      "id": "72f18764-4951-4f40-82fd-626dfad3ad83",
+      "name": "Add LLM Stats rationale"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "llm_request_cost_usd"
+            },
+            {
+              "aggregation": "sum",
+              "field": "llm_request_duration_sec"
+            },
+            {
+              "aggregation": "sum",
+              "field": "llm_request_tokens_in"
+            },
+            {
+              "aggregation": "sum",
+              "field": "llm_request_tokens_out"
+            },
+            {
+              "aggregation": "sum",
+              "field": "llm_request_tokens_cached"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        5456,
+        752
+      ],
+      "id": "806d3d36-500d-4e82-9dd8-b007357a4682",
+      "name": "Sum LLM stats"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "22f0f80a-34b3-4273-82ea-39421766ade0",
+              "name": "workflow_item_duration_sec",
+              "value": "={{ DateTime.fromISO($json.startDateTime).diffToNow('seconds') * -1 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6016,
+        1232
+      ],
+      "id": "14c97a14-8e41-426c-b60b-a5b781f03786",
+      "name": "Calculate Workflow Item Duration"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        656,
+        176
+      ],
+      "id": "384073c6-d569-40bb-a073-53710df83df9",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        400,
+        176
+      ],
+      "id": "309ec978-933b-4909-bc0d-cd2c719c9f25",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "outputFieldName": "startDateTime",
+        "options": {
+          "includeInputFields": true
+        }
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        880,
+        336
+      ],
+      "id": "b3b53df2-1714-4388-9d45-878fe6b7c0ce",
+      "name": "Add Start Date & Time"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ebc27f96-ae70-42a9-970b-37f2736cad2a",
+              "name": "startDateTime",
+              "value": "={{ $json.startDateTime }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5456,
+        352
+      ],
+      "id": "2e5a316d-792c-4ac4-8939-9ce313c49301",
+      "name": "Take Start Date & Time"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1408,
+        528
+      ],
+      "id": "c90bbe13-bbe3-49ff-9bfc-46e2f43e5659",
+      "name": "Choose Input 1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO organisational_hypothesises (\n    company_id,\n    llm_prompt,\n    llm_tokens_in,\n    llm_tokens_out,\n    llm_tokens_cached,\n    llm_cost_usd,\n    llm_duration_sec,\n    organizational_hypothesis,\n    execution_id,\n    inserted_at\n) VALUES (\n    $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW()\n)\nON CONFLICT (company_id) DO NOTHING\nRETURNING organizational_hypothesis;",
+        "options": {
+          "queryReplacement": "={{ [$json.company_id, $json.prompt, $json.llm_request_tokens_in, $json.llm_request_tokens_out, $json.llm_request_tokens_cached, $json.llm_request_cost_usd, $json.llm_request_duration_sec, $json.llm_response.output[1].content[0].text, $execution.id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2320,
+        576
+      ],
+      "id": "5c6d31b8-f837-4bb7-937c-d3524b328014",
+      "name": "Persist organisational hypothesis",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT organizational_hypothesis FROM organisational_hypothesises WHERE company_id = $1;",
+        "options": {
+          "queryReplacement": "={{ [$json.company_id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1088,
+        848
+      ],
+      "id": "bd632aca-8fe4-463f-ac2c-eacf1d24ac5b",
+      "name": "Get organisational hypothesis",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-5-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {
+          "reasoning": {
+            "reasoningOptions": {
+              "effort": "high",
+              "summary": "none"
+            }
+          },
+          "textFormat": {
+            "textOptions": {
+              "type": "text",
+              "verbosity": "low"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1728,
+        416
+      ],
+      "id": "d13f4707-db2e-44d0-b091-0c78061c88f1",
+      "name": "Make organisational hypothesis",
+      "credentials": {
+        "openAiApi": {
+          "id": "QLMDUQJxxyDwrXHU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53696d99-4355-4a9a-8c68-3f1b778a614b",
+              "name": "prompt",
+              "value": "=You are an organizational structure analyst. Based on limited firmographic data, generate a HYPOTHESIS about typical reporting structures and budget authority for a prospect company. Your output must include confidence scores and explicit assumptions.\n\nINPUT FIELDS:\n- Company Name: {{ $json['Company Name'] }}\n- Industry: {{ $json.Industry }}\n- Employee Count: {{ $json['Number of Employees'] }}\n- Annual Revenue: {{ $json['Annual Revenue'] }}\n- Year Founded: {{ $json['Year Founded'] }}\n- Country: {{ $json['Country'] }}\n\nCONTEXT:\n{{ $json.what_we_sell }}\n\nCONSTRAINTS:\n- Never fabricate specific names, titles, or org chart details not inferable from provided fields\n- If a field is missing or ambiguous, state \"UNKNOWN - [field name] not provided\" and reduce confidence\n- Cap confidence at 70% maximum—we're guessing, not knowing\n- This is one-shot generation not a chat, the answer will be used as is \n\nOUTPUT FORMAT:\n\n**ORGANIZATIONAL HYPOTHESIS** (Confidence: X%)  \nAt [Employee Count]-person companies in [Industry] with ~$[Revenue] revenue, the typical executive structure for billing/finance systems decisions is:\n\n- **Budget Approval Authority:**  \n  - $0-50K: [Role + reasoning]  \n  - $50-150K: [Role + reasoning]  \n  - $150K+: [Role + reasoning]\n\n- **Relevant Function Structure:**  \n  The [Finance/RevOps/Product] organization typically reports to [CXO] and includes [key roles]. For a $80-100K billing infrastructure purchase, the likely approval chain is [describe].\n\n- **Decision-Making Style:**  \n  [Centralized/Distributed/Committee-based] for enterprise software purchases in this segment.\n\n**KEY ASSUMPTIONS** (What we don't know but are inferring):  \n1. [Assumption based on industry patterns]  \n2. [Assumption based on company size]  \n3. [Assumption about maturity/growth stage]\n\n**CONFIDENCE BREAKDOWN:**  \n- Overall: X%  \n- Approval thresholds: X%  \n- Reporting structure: X%  \n- Decision-making style: X%\n\n**RED FLAGS** (Signs this hypothesis may be wrong):  \n- If [condition], discard this and investigate manually  \n- If [condition], the approval chain likely differs  \n",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        528
+      ],
+      "id": "e1254a73-8a11-4261-b20d-7002d071e96d",
+      "name": "organisational hypothesis Prompt"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2160,
+        512
+      ],
+      "id": "d2c89d7f-7b5d-4942-8bc7-6c726a95cf55",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3712,
+        832
+      ],
+      "id": "493ffc7c-cecf-4df9-b2ac-d964736cdcc1",
+      "name": "Merge5"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO meddic_roles (\n    company_id,\n    contact_id,\n    llm_prompt,\n    llm_tokens_in,\n    llm_tokens_out,\n    llm_tokens_cached,\n    llm_cost_usd,\n    llm_duration_sec,\n    llm_output_schema,\n    \"output\",\n    execution_id,\n    inserted_at\n) VALUES (\n    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW()\n)\nON CONFLICT (company_id, contact_id) DO NOTHING\nRETURNING id as meddic_role_id, \"output\";\n",
+        "options": {
+          "queryReplacement": "={{ [$json.company_id, $json.contact_id, $json.prompt, $json.llm_request_tokens_in, $json.llm_request_tokens_out, $json.llm_request_tokens_cached, $json.llm_request_cost_usd, $json.llm_request_duration_sec, $json.llm_response.text.format.schema, $json.llm_response.output[1].content[0].text, $execution.id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3872,
+        848
+      ],
+      "id": "0805afe5-1922-415e-8f2e-6854c3fc9f18",
+      "name": "Persist MEDDIC role",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b86a7319-64be-428f-9f02-9ca8546c2c36",
+              "name": "role",
+              "value": "={{ $json.output.classification }}",
+              "type": "string"
+            },
+            {
+              "id": "a5913952-11b4-4cde-bc85-3a8532f484c3",
+              "name": "confidence_score",
+              "value": "={{ $json.output.confidence_score }}",
+              "type": "number"
+            },
+            {
+              "id": "dd816e2b-da0a-4dbd-8c99-592d1e92e068",
+              "name": "alternative_role",
+              "value": "={{ $json.output.alternative_classification }}",
+              "type": "string"
+            },
+            {
+              "id": "5d7bcbd0-c1bf-419f-94f7-41c4bb3ff33b",
+              "name": "org_context_consideration",
+              "value": "={{ $json.output.reasoning.org_context_consideration }}",
+              "type": "string"
+            },
+            {
+              "id": "7aac12ea-ba84-42ea-8b7f-0fac5a191b57",
+              "name": "meddic_logic_application",
+              "value": "={{ $json.output.reasoning.meddic_logic_application }}",
+              "type": "string"
+            },
+            {
+              "id": "fc6af979-2896-4404-aee4-2ea34ed8d540",
+              "name": "key_evidence_summary",
+              "value": "={{ $json.output.reasoning.key_evidence_summary.join(\", \") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4192,
+        944
+      ],
+      "id": "b9afc9ba-c97f-49af-87a0-bba793ffae95",
+      "name": "Take role, confidence, alternative, rationale pieces"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d0230d9b-b21f-466e-bf75-18bb5058c3a7",
+              "name": "prompt",
+              "value": "=You are my editor. \n\nContext:\n- Goal: Prepare a short explanation why we classified the prospect as {{ $json.role }} role\n- Audience: Sales developer representatives\n- Constraints: Use Organisational Conext Hypothesis, Role Logic Application, Key Evidence.\n- Deliverable: Short 1-3 sentence explanation for CRM system that audience can grasp quickly in one sight.\n\nInstructions (do three passes):\n\nPass 1 - Key Evidence based summary\n- Draft text of the explanation as summary of Role Logic Application supported by Key Evidence.\n- Reduce the text down to 4 sentences max.\n- Output: draft text of the explanation with explicit citation of all Key Evidence at the end.\n\nPass 2 — Structure & Clarity (no tone changes):\n- Reorganize logic, cut redundancy, fix unclear lines.\n- Output: revised text + 3 bullets on biggest fixes.\n\nPass 3 — Tone & Polish:\n- Apply the neutral professional tone. Use the a sales colleague voice.\n- Output: final_version.\n\nOutput Rules: Preserve meaning. No new facts. All key evidence should be cited. The role will be in a separate field, so don't mention it. The summary will be labeled as rationale in the CRM so don't include rationale word in output. Keep passes for your internal work, return the final version only.\n\nInput: \n\nOrganisational Conext Hypothesis:\n{{ $json.org_context_consideration }}\n\nRole Logic Application:\n{{ $json.meddic_logic_application }}\n\nKey Evidence:\n{{ $json.key_evidence_summary }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4544,
+        1280
+      ],
+      "id": "ea137ab6-07fa-43c3-8bbc-33e031c9787b",
+      "name": "Rationale summarization prompt"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5136,
+        1344
+      ],
+      "id": "2026225c-097b-4e18-89ec-73399d6c48cb",
+      "name": "Merge4"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "BEGIN;\n\nWITH inserted AS (\n  INSERT INTO rationales (\n      meddic_role_id,\n      llm_prompt,\n      llm_tokens_in,\n      llm_tokens_out,\n      llm_tokens_cached,\n      llm_cost_usd,\n      llm_duration_sec,\n      rationale,\n      execution_id,\n      inserted_at\n  ) VALUES (\n      $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW()\n  )\n  ON CONFLICT (meddic_role_id) DO NOTHING\n  RETURNING rationale\n)\nSELECT rationale FROM inserted\nUNION ALL\nSELECT rationale FROM rationales\nWHERE meddic_role_id = $1 AND NOT EXISTS (SELECT 1 FROM inserted);\n\nCOMMIT;",
+        "options": {
+          "queryReplacement": "={{ [$json.meddic_role_id, $json.prompt, $json.llm_request_tokens_in, $json.llm_request_tokens_out, $json.llm_request_tokens_cached, $json.llm_request_cost_usd, $json.llm_request_duration_sec, $json.rationale, $execution.id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5472,
+        1264
+      ],
+      "id": "e00a6362-2bc6-4d8a-9b19-52199d0884ab",
+      "name": "Persist rationale",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6b419647-e821-4250-bbb9-980ce7c3db28",
+              "name": "rationale",
+              "value": "={{ $json.llm_response.output[1].content[0].text.final_version.replace(/^[^:]+:\\s*/, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "0134642a-f1ee-490c-b1df-b0c1c39a33f7",
+              "name": "llm_response",
+              "value": "--",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5296,
+        1264
+      ],
+      "id": "99c319d6-4938-4e8e-915a-93ff76f5c943",
+      "name": "Drop label in rationale if any, bypass other fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2000,
+        704
+      ],
+      "id": "a5960ddc-129f-4dd7-ab74-89d24ffb7abf",
+      "name": "No LLM stats",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO outbound_crm_updates (\n    contact_id,\n    llm_total_tokens_in,\n    llm_total_tokens_out,\n    llm_total_tokens_cached,\n    llm_total_cost_usd,\n    llm_total_duration_sec,\n    workflow_item_total_duration_sec,\n    \"role\",\n    confidence_score,\n    rationale,\n    contact_fields,\n    execution_id,\n    upload_attempts,\n    inserted_at\n) VALUES (\n    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 0, NOW()\n)\nON CONFLICT (contact_id) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ [$json.contact_id, $json.sum_llm_request_tokens_in, $json.sum_llm_request_tokens_out, $json.sum_llm_request_tokens_cached, $json.sum_llm_request_cost_usd, $json.sum_llm_request_duration_sec, $json.workflow_item_duration_sec, $json.role, $json.confidence_score, $json.rationale, $json.contact_fields, $execution.id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        6208,
+        1424
+      ],
+      "id": "c19224df-d1b6-4954-92a6-4c869e459003",
+      "name": "Persist outbound CRM update",
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c83650b7-b076-467b-922c-e66a2fc0a698",
+              "name": "prompt",
+              "value": "=You are a MEDDIC sales qualification expert analyzing a prospect contact. Your goal is to classify their role in a potential billing infrastructure deal.\n\n=== CONTEXT: WHAT WE'RE SELLING ===\n{{ $json.what_we_sell }}\n\n=== ORGANIZATIONAL CONTEXT ASSUMPTION ===\n{{ $json.organizational_hypothesis }}\n\n=== PROSPECT DATA ===\n**Contact Information:**\n- Name: {{ $json['First Name'] }} {{ $json['Last Name'] }}\n- Employment Seniority: {{ $json['Employment Seniority'] }}\n- Employment Role: {{ $json['Employment Role'] }}\n- Employment Sub Role: {{ $json['Employment Sub Role'] }}\n**Work Experience:**\n{{ $json['Work Experience'] }}\n\n**Company Information:**\n- Company Name: {{ $json['Company Name'] }}\n- Industry: {{ $json.Industry }}\n- Employee Count: {{ $json['Number of Employees'] }}\n- Annual Revenue: {{ $json['Annual Revenue'] }}\n\n=== MEDDIC ROLE DEFINITIONS ===\n\n**ECONOMIC BUYER:**\n- Makes final approval decision based on ROI and strategic value\n- Controls or influences budgets across departments\n- Asks: \"How much will you save/make me? How soon? What's the risk?\"\n- Typically C-level (CFO, COO, CEO) or VP-level in smaller orgs (<200 employees)\n- Aligned with business objectives and corporate strategy\n- May sit above budget holders and move money between initiatives\n\n**CHAMPION:**\n- Actively sells internally on your behalf (not just interested)\n- Has political capital: respected, track record of successful projects\n- Access to Economic Buyer and can influence them\n- Motivated by personal win (career advancement, solving their pain)\n- Helps navigate procurement, generates success metrics, exposes competitor weaknesses\n- Can be Director/VP/Manager level with strong influence\n- **Critical:** Willing to take ownership of project success to Economic Buyer\n\n**COACH:**\n- Provides intel and guidance but doesn't advocate for you\n- Has process knowledge (procurement, technical implementation)\n- Participated in similar projects on execution side\n- Lacks decision authority or political capital to champion\n- Helpful but won't put their credibility on the line\n\n**IRRELEVANT:**\n- Individual contributor interested but no influence\n- Wrong function (unrelated to billing/finance/revenue operations)\n- Junior employee without access to decision-makers\n\n=== YOUR TASK ===\n\nAnalyze the prospect data and return a JSON object (ONLY valid JSON, no preamble or explanation outside the JSON):\n\n{\n  \"classification\": \"Economic Buyer|Champion|Coach|Irrelevant\",\n  \"confidence_score\": 0-100,\n  \"reasoning\": {\n    \"role_signals\": {\n      \"seniority_weight\": \"Explain how seniority level affects classification\",\n      \"functional_alignment\": \"How well does their role align with Billo's value prop (finance/ops/product)?\",\n      \"budget_authority_indicators\": \"Quote evidence of budget control or strategic decision-making, or 'none found'\",\n      \"political_capital_indicators\": \"Quote evidence of executive access, cross-functional influence, project ownership, or 'none found'\",\n      \"procurement_technical_indicators\": \"Quote evidence of technical implementation knowledge, system integration experience, or procurement process familiarity without decision authority. For engineering/IT roles, note if they would be involved in technical evaluation or implementation. Quote evidence or state 'none found'\"\n    },\n    \"org_context_consideration\": \"How does company size/structure affect this classification? Why might standard rules not apply here?\",\n    \"meddic_logic_application\": \"Walk through your reasoning: Which MEDDIC indicators are strongest? Which are missing? Why did you choose this classification over alternatives?\",\n    \"key_evidence_summary\": \"List the 2-3 strongest pieces of evidence from Work Experience that drove your decision\"\n  },\n  \"alternative_classification\": \"If confidence < 70, and any signals for Champion or Coach were evidenced then what's the second most likely role? Else second role is Irrelevant.\",\n  \"data_quality_flag\": \"sufficient|sparse|missing_critical_info\"\n}\n\n=== SCORING GUIDANCE (NOT RIGID RULES) ===\n\n**High Confidence (80-100):**\n- Multiple strong MEDDIC indicators from Work Experience quotes\n- Functional role directly aligned with Billo's buyer profile\n- Org context supports this person having the identified authority\n- Clear evidence trail (not inference based only on title)\n\n**Medium Confidence (50-79):**\n- Some MEDDIC indicators present but incomplete picture\n- Title suggests role but Work Experience doesn't confirm behaviors\n- Org structure is ambiguous (e.g., flat startup vs. traditional enterprise)\n- Could be this role OR the alternative classification\n\n**Low Confidence (0-49):**\n- Insufficient Work Experience data to extract behavioral evidence\n- Conflicting signals (senior title but IC scope)\n- Misalignment between role and Billo's typical buyer profile\n- Guess based primarily on seniority without supporting evidence\n\n=== ANTI-HALLUCINATION RULES ===\n\n1. **Quote Accuracy:** Every quote in \"evidence\" fields MUST be exact text from Work Experience. If paraphrasing, clearly mark as [paraphrased].\n\n2. **Insufficient Data Handling:** If Work Experience is <200 words or <3 job entries, set data_quality_flag to \"sparse\" and cap confidence at 60. State explicitly in reasoning.\n\n3. **No Invented Relationships:** Do NOT infer executive access, budget authority, or political capital unless explicitly stated in Work Experience. Absence of evidence ≠ evidence of absence, but don't fabricate.\n\n4. **Title-Only Trap:** If your reasoning relies primarily on job title without behavioral evidence from Work Experience, reduce confidence by 20 points and flag in reasoning.\n\n5. **Org Context Integration:** Use the organizational context to weight classifications (e.g., VP at 50-person startup ≈ C-level authority; Director at 5000-person enterprise = mid-level). Explain this adjustment in org_context_consideration.\n\n=== EXAMPLES OF GOOD REASONING ===\n\n**Example 1 - Economic Buyer (High Confidence):**\n```json\n\"reasoning\": {\n  \"role_signals\": {\n    \"seniority_weight\": \"CFO at 300-person company—typically the economic buyer for finance infrastructure\",\n    \"functional_alignment\": \"Direct ownership of billing/revenue operations per org context\",\n    \"budget_authority_indicators\": \"Work Experience shows 'overseeing $50M+ revenue operations' and 'leading financial systems modernization initiative'—clear budget control\",\n    \"political_capital_indicators\": \"Reports directly to CEO per org chart, leads cross-functional initiatives with Product and Engineering\",\n    \"procurement_technical_indicators\": \"none found\"\n  },\n  \"org_context_consideration\": \"At this company size, CFO would have final approval for $20K-$100K finance tools per org context. No CEO sign-off needed at this tier.\",\n  \"meddic_logic_application\": \"Three strong Economic Buyer signals: (1) budget authority confirmed in work history, (2) strategic scope over revenue operations, (3) seniority aligns with approval thresholds. No Champion signals (not advocating, they ARE the decision). High confidence.\",\n  \"key_evidence_summary\": [\"CFO title with revenue ops scope\", \"Quoted budget authority from work history\", \"Org context confirms approval power at this level\"]\n},\n\"confidence_score\": 92\n```\n\n**Example 2 - Champion (Medium Confidence):**\n```json\n\"reasoning\": {\n  \"role_signals\": {\n    \"seniority_weight\": \"Director of Finance Operations—mid-level, typically needs VP/CFO approval but has influence\",\n    \"functional_alignment\": \"Directly owns billing pain points that Billo solves\",\n    \"budget_authority_indicators\": \"none found—no explicit budget authority mentioned\",\n    \"political_capital_indicators\": \"[paraphrased] Led 3 successful system implementations, collaborates with CFO on strategic initiatives, owns revenue operations roadmap\",\n    \"procurement_technical_indicators\": \"none found\"\n  },\n  \"org_context_consideration\": \"Director at 500-person company likely owns the problem but not the budget. However, track record and CFO collaboration suggest political capital to champion.\",\n  \"meddic_logic_application\": \"Strong Champion indicators: (1) owns the pain, (2) track record of successful projects builds credibility, (3) CFO access implied. MISSING: no explicit mention of motivation or willingness to advocate. Could also be Coach if just providing info. Medium confidence pending validation.\",\n  \"key_evidence_summary\": [\"Owns billing operations directly\", \"Track record of implementations\", \"Works with CFO per work history\"]\n},\n\"confidence_score\": 68,\n\"alternative_classification\": \"Coach\"\n```\n\n**Example 3 - Irrelevant (High Confidence - Sparse Data):**\n```json\n\"reasoning\": {\n  \"role_signals\": {\n    \"seniority_weight\": \"Senior Software Engineer—individual contributor\",\n    \"functional_alignment\": \"Engineering role, no connection to finance/billing/revenue operations\",\n    \"budget_authority_indicators\": \"none found\",\n    \"political_capital_indicators\": \"none found\",\n    \"procurement_technical_indicators\": \"Work Experience shows: 'built iOS apps, led mobile engineering team'—technical execution only\"\n  },\n  \"org_context_consideration\": \"At any company size, senior ICs don't make infrastructure purchasing decisions for finance systems. Wrong buyer persona.\",\n  \"meddic_logic_application\": \"No MEDDIC indicators present. Wrong functional area (eng vs. finance/ops), no decision authority, no executive access mentioned. Clear Irrelevant classification.\",\n  \"key_evidence_summary\": [\"Engineering IC role\", \"No finance/ops connection\", \"No budget or influence indicators\"]\n},\n\"confidence_score\": 85,\n\"data_quality_flag\": \"sufficient\"\n```\n\n=== NOW ANALYZE THE PROSPECT DATA PROVIDED ABOVE ===\n\nReturn ONLY the JSON object. No additional commentary.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3120,
+        848
+      ],
+      "id": "2f82ac0a-c529-444f-8f56-59b844978734",
+      "name": "MEDDIC role prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31b9de0f-8592-4614-ac5b-8b19a095cff1",
+              "name": "contact_id",
+              "value": "={{ $json.contact_id }}",
+              "type": "number"
+            },
+            {
+              "id": "d7311cc7-0189-4d5b-ad4e-3a017a59543c",
+              "name": "company_id",
+              "value": "={{ $json.company_id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2640,
+        1232
+      ],
+      "id": "9a87c387-4999-4575-804c-b10da9c8e712",
+      "name": "Take contact_id, company_id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd6edd3b-8b21-41f4-a071-ae35705b41b6",
+              "name": "meddic_role_id",
+              "value": "={{ $json.meddic_role_id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4192,
+        1392
+      ],
+      "id": "02aeed7e-4f69-4a1b-8344-7ddd23ad1d9f",
+      "name": "Take meddic_role_id"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        192
+      ],
+      "id": "f6afddff-8611-4bc8-882d-a087231ecf8e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id as meddic_role_id, \"output\" FROM meddic_roles\nWHERE (company_id, contact_id) = ($1, $2);",
+        "options": {
+          "queryReplacement": "={{ [$json.company_id, $json.contact_id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2640,
+        1072
+      ],
+      "id": "a5e6e328-9ac9-4615-9a1b-25aba27fe2a3",
+      "name": "Get MEDDIC role",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "BXJacUuclptZ8lHU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "650c6fbf-6841-4e13-83a7-c101dfd9c291",
+              "leftValue": "={{ $json[\"organizational_hypothesis\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        848
+      ],
+      "id": "e494070c-982f-481d-9990-4a3c0b5678e1",
+      "name": "If hypothesis is not persisted yet"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4032,
+        1088
+      ],
+      "id": "0a9ff399-0cc6-4833-9edb-84d523375138",
+      "name": "Bypass"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3552,
+        976
+      ],
+      "id": "2612707f-2d26-455c-a286-e39d4f38823a",
+      "name": "No LLM stats1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "414eca3f-cf0a-4373-a99f-4e585642a739",
+              "leftValue": "={{ $json[\"output\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2800,
+        1072
+      ],
+      "id": "5c85ee60-eb1a-4b8c-8b2b-7b546cf33d98",
+      "name": "If role is not persisted"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2960,
+        848
+      ],
+      "id": "a52394e4-c695-41cf-84b6-4b5ee331db75",
+      "name": "Choose Input 1 (1)"
+    }
+  ],
+  "connections": {
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Take contact_id, company_id",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get MEDDIC role",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Choose Input 1 (1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify MEDDIC role": {
+      "main": [
+        [
+          {
+            "node": "Add LLM Stats role",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Build HubSpot fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize rationale": {
+      "main": [
+        [
+          {
+            "node": "Add LLM Stats rationale",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reduce alternative role to irrelevant_maybe_ if applicable": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 2
+          },
+          {
+            "node": "Rationale summarization prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge LLM Stats": {
+      "main": [
+        [
+          {
+            "node": "Sum LLM stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HubSpot fields": {
+      "main": [
+        [
+          {
+            "node": "Calculate Workflow Item Duration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define what we sell, ICP, Deal Size": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get HubSpot Contacts for Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Map contact and company fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map contact and company fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add LLM Stats org": {
+      "main": [
+        [
+          {
+            "node": "Merge LLM Stats",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add LLM Stats role": {
+      "main": [
+        [
+          {
+            "node": "Merge LLM Stats",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add LLM Stats rationale": {
+      "main": [
+        [
+          {
+            "node": "Merge LLM Stats",
+            "type": "main",
+            "index": 2
+          },
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sum LLM stats": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Calculate Workflow Item Duration": {
+      "main": [
+        [
+          {
+            "node": "Persist outbound CRM update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Add Start Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Start Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Take Start Date & Time",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get organisational hypothesis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Choose Input 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Take Start Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose Input 1": {
+      "main": [
+        [
+          {
+            "node": "organisational hypothesis Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist organisational hypothesis": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get organisational hypothesis": {
+      "main": [
+        [
+          {
+            "node": "If hypothesis is not persisted yet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make organisational hypothesis": {
+      "main": [
+        [
+          {
+            "node": "Add LLM Stats org",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "organisational hypothesis Prompt": {
+      "main": [
+        [
+          {
+            "node": "Make organisational hypothesis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Persist organisational hypothesis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge5": {
+      "main": [
+        [
+          {
+            "node": "Persist MEDDIC role",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take role, confidence, alternative, rationale pieces": {
+      "main": [
+        [
+          {
+            "node": "Reduce alternative role to irrelevant_maybe_ if applicable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist MEDDIC role": {
+      "main": [
+        [
+          {
+            "node": "Bypass",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rationale summarization prompt": {
+      "main": [
+        [
+          {
+            "node": "Summarize rationale",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "Drop label in rationale if any, bypass other fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drop label in rationale if any, bypass other fields": {
+      "main": [
+        [
+          {
+            "node": "Persist rationale",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No LLM stats": {
+      "main": [
+        [
+          {
+            "node": "Merge LLM Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist rationale": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Persist outbound CRM update": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MEDDIC role prompt": {
+      "main": [
+        [
+          {
+            "node": "Classify MEDDIC role",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Take contact_id, company_id": {
+      "main": [
+        [
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 2
+          },
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Take meddic_role_id": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get HubSpot Contacts for Enrichment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Define what we sell, ICP, Deal Size",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get MEDDIC role": {
+      "main": [
+        [
+          {
+            "node": "If role is not persisted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If hypothesis is not persisted yet": {
+      "main": [
+        [
+          {
+            "node": "Choose Input 1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "No LLM stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bypass": {
+      "main": [
+        [
+          {
+            "node": "Take role, confidence, alternative, rationale pieces",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Take meddic_role_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No LLM stats1": {
+      "main": [
+        [
+          {
+            "node": "Merge LLM Stats",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If role is not persisted": {
+      "main": [
+        [
+          {
+            "node": "Choose Input 1 (1)",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Bypass",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "No LLM stats1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose Input 1 (1)": {
+      "main": [
+        [
+          {
+            "node": "MEDDIC role prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "960b9e7e-e235-41b1-9e37-695be7752103",
+  "activeVersionId": "960b9e7e-e235-41b1-9e37-695be7752103",
+  "versionCounter": 6,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-01-06T08:57:48.210Z",
+      "createdAt": "2026-01-06T08:57:48.210Z",
+      "role": "workflow:owner",
+      "workflowId": "LuWL1V6afvvZ9tpcqCFzd",
+      "projectId": "HbDRwYWNz9gHlL39",
+      "project": {
+        "updatedAt": "2026-01-06T00:02:06.543Z",
+        "createdAt": "2026-01-06T00:01:48.834Z",
+        "id": "HbDRwYWNz9gHlL39",
+        "name": "First Last <test@example.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "352b51df-4987-4bf5-9076-d287a2629321"
+      }
+    }
+  ]
+}
