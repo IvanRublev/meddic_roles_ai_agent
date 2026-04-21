@@ -10,7 +10,7 @@ An AI agent that enriches HubSpot CRM contacts with [MEDDIC roles](https://www.a
 - Updates HubSpot with the Possible MEDDIC role name and rationale for classification
 
 For classification to work, all input properties in HubSpot for the contact and associated company must have set values.
-See the "Properties used as input" section in [HubSpot.MD](HubSpot.MD).
+See the "Properties used as input" section in [HubSpot.md](HubSpot.md).
 These properties can be enriched using methods not covered in this repository.
 
 ### Technical stack
@@ -27,7 +27,7 @@ Please, contact the author for assistance (https://ivanrublev.com).
 ## Limitations
 
 A contact's MEDDIC role will be classified if the following conditions are met:
-* All of the input HubSpot properties have a value (see the "Properties used as input" section in [HubSpot.MD](HubSpot.MD))
+* All of the input HubSpot properties have a value (see the "Properties used as input" section in [HubSpot.md](HubSpot.md))
 * Only one company is associated with the contact in HubSpot
 
 To re-run the classification for the contact, any of the input HubSpot properties for the contact or associated company must have a new value, and the `Possible Role` property must be empty. 
@@ -50,7 +50,7 @@ with seventeen batches of contacts for enrichment as input.
 ## Setup
 
 1. Copy the `.env-example` file to `.env` and specify the service tokens, keys, and database password 
-    * See "HubSpot API Token" in [HubSpot.MD](HubSpot.MD)
+    * See "HubSpot API Token" in [HubSpot.md](HubSpot.md)
     * OpenAI API Key can be created on the [developer platform](https://platform.openai.com/api-keys)
 2. Run the containers with the `docker-compose up` command
 3. Open the n8n web interface which is on port 5678 by default by opening the `http://localhost:5678` URL in a browser
@@ -59,7 +59,7 @@ with seventeen batches of contacts for enrichment as input.
 6. In the n8n web interface import all files from the `workflows/` directory with the following
     * Create a workflow, then choose the three dots → Import from file, press the Save button followed by the Publish button, repeat for each file
     * To publish **3. MEDDIC Roles AI Agent** workflow choose the appropriate subworkflow from the dropdown list in `Get HubSpot Contacts for Enrichment` and each `Add LLM Stats` nodes
-8. Configure the HubSpot data model as specified in [HubSpot.MD](HubSpot.MD)
+8. Configure the HubSpot data model as specified in [HubSpot.md](HubSpot.md)
 9. Start to add the contacts with required properties to the HubSpot
 
 
